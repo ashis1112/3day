@@ -8,7 +8,7 @@ exports.getuser=(req, res, next)=>{
     res.status(200).json('get success')
 }
 
-exports.postuser=(req,res)=>{
+exports.postuser=(req,res,next)=>{
   const {name,email,password}=req.body
   const value = new Validator(req.body, {
     email: 'required|email',
@@ -18,7 +18,7 @@ exports.postuser=(req,res)=>{
     if (!matched) {
       return res.status(422).json({err:value.errors});
     }
-    // console.log(req.body)
+    console.log(req.body)
   });
   // const error=validationResult(req)
   let token
@@ -28,13 +28,15 @@ exports.postuser=(req,res)=>{
     }
     token=Buffer.toString('hex')
   })
-  req.db.collection('user').find({email:email}).toArray()
+  req.db.collection('user').find().toArray()
     .then(data=>{
+      console.log(data)
       data.forEach(e => {
         if(email === e.email ){
-            return  res.status(400).json("email exist")
-        }else{
-        return bcrypt.hash(password,10)
+            res.status(400).json("email exist")
+      
+          }else{
+         bcrypt.hash(password,10)
         .then(haspas=>{
             req.db.collection('user').insert({
             name:name,
@@ -53,49 +55,52 @@ exports.postuser=(req,res)=>{
           console.log(err)
         })
 
-      })
-    }
+          })
+      }
+  })
+})
 }
     
   
-// exports.getlogin=(req,res)=>{
-//     res.status(200).json("do login")
-// }
+exports.getlogin=(req,res)=>{
+    res.status(200).json("do login")
+}
 
-// exports.postlogin=(req,res)=>{
+exports.postlogin=(req,res)=>{
 
-//     const {email,password,token}=req.body
-//     const value = new Validator(req.body, {
-//       email: 'required|email',
-//       password: 'required'
-//     });
-//     value.check().then((matched) => {
-//       if (!matched) {
-//         return res.status(422).json({err:value.errors});
-//       }
-//     });
-//     // const error=validationResult(req)
-//     req.db.collection('user').find({email:email}).toArray()
-//     .then(data=>{
-//       console.log(data)
-//       data.forEach(ele => {
-//         console.log(ele)
-//           if(token != ele.token){
-//            return  res.status(400).json("token does not match")
-//           }
-//           return bcrypt.compare(password,ele.password)
-//           .then(result=>{
-//             if(!result){
-//               res.status(400).json({msg:"password does not match"})
-//             }
-//             res.status(200).json({msg:'u login',yourname:ele.name})
-//             req.getuser=ele
-//             return res.redirect('/login')
-//           })
-//           .catch(err=>{
-//             console.log(err)
-//           })
-//       })
-//     }).catch(err=>console.log(err))
+    const {email,password,token}=req.body
+    const value = new Validator(req.body, {
+      email: 'required|email',
+      password: 'required'
+    });
+    value.check().then((matched) => {
+      if (!matched) {
+        return res.status(422).json({err:value.errors});
+      }
+    });
+    // const error=validationResult(req)
+    req.db.collection('user').find({email:email}).toArray()
+    .then(data=>{
+      // console.log(data)
+      data.forEach(ele => {
+        // console.log(ele)
+          if(token != ele.token){
+           return  res.status(400).json("token does not match")
+          }
+          return bcrypt.compare(password,ele.password)
+          .then(result=>{
+            if(!result){
+              res.status(400).json({msg:"password does not match"})
+            }
+            res.status(200).json({msg:'u login',yourname:ele.name})
+            req.getuser=ele
+            console.log(req.getuser)
+            return res.redirect('/login')
+          })
+          .catch(err=>{
+            console.log(err)
+          })
+      })
+    }).catch(err=>console.log(err))
     
-//   }
+}
