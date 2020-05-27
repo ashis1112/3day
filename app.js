@@ -4,12 +4,30 @@ var app=express()
 var path = require('path');
 // var cookieParser = require('cookie-parser');
 // var logger = require('morgan');
+// const getdb=require('./database/database').getdb
+const MongoClient = require('mongodb').MongoClient;
+const ObjectId = require('mongodb').ObjectId;
 
-var indexRouter = require('./routes/index');
+// var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-const mongoclient=require('./database/database').mongoconnect
-
 var app = express();
+
+let url="mongodb+srv://noder:nodejs@cluster0-1wmiy.mongodb.net/webhibe"
+const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
+var DB = null;
+client.connect(async (err) => {
+    if (err) {
+        console.log('db error', err);
+    } else {
+        console.log('db connect');
+        DB = await client.db(process.env.DB);
+    }
+});
+   
+app.use((req,res,next)=>{
+    req.db=DB
+    next()
+})
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -21,7 +39,13 @@ app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// app.use((req,res,next)=>{
+//     req.db=getdb
+//     next()
+// })
+
 // app.use('/', indexRouter);
+
 app.use(usersRouter);
 
 // // catch 404 and forward to error handler
@@ -40,7 +64,7 @@ app.use(usersRouter);
 //   res.render('error');
 // });
 
-mongoclient()
+
 app.listen(3001)
 
 module.exports = app;

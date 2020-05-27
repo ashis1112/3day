@@ -1,4 +1,3 @@
-const getdb=require('../database/database').getdb
 
 class User{
     constructor(name,email,password){

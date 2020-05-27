@@ -1,23 +1,15 @@
 var express = require('express');
 var router = express.Router();
-const Users=require('../model/user')
-
+// const Users=require('../model/user')
+const {getuser,postuser,getlogin,postlogin}=require('../controlle/users')
+// const {check,body}=require('express-validator')
 /* GET users listing. */
-router.get('/users',(req, res, next)=>{
-  res.status(200).json('get success')
-});
+router.get('/users',getuser);
 
-router.post('/users',(req,res)=>{
-  const {name,email,password}=req.body
-  const user=new Users(name,email,password)
-  user.register()
-  .then(value=>{
-    console.log(value)
-  })
-  .catch(err=>{
-    console.log(err)
-  })
-  
-})
+router.post('/users',postuser)
+
+router.get('/login',getlogin)
+
+router.post('/login',postlogin)
 
 module.exports = router;
